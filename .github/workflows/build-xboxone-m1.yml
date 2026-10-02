@@ -1,0 +1,66 @@
+name: Build Xbox One M1 UWP
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - xbox-one-m1
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install Meson and Ninja
+        shell: pwsh
+        run: py -m pip install --upgrade meson ninja
+
+      - name: Configure
+        shell: pwsh
+        run: meson setup build-xboxone -Dxboxone=true -Dx86_version=1 -Dopengl=disabled -Dvulkan=disabled -Dsdl=enabled -Dsdl_image=disabled -Db_lto=false -Dbuildtype=debug
+
+      - name: Build
+        shell: pwsh
+        run: meson compile -C build-xboxone xemu-xboxone
+
+      - name: Assemble AppX
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path appx | Out-Null
+          Copy-Item xboxone/Package.appxmanifest appx/AppxManifest.xml
+          New-Item -ItemType Directory -Force -Path appx/Assets | Out-Null
+          Copy-Item xboxone/Assets/xemu_64x64.png appx/Assets/xemu_64x64.png
+          Copy-Item build-xboxone/xemu-xboxone.exe appx/xemu-xboxone.exe
+
+      - name: Create development certificate
+        shell: pwsh
+        run: |
+          $cert = New-SelfSignedCertificate -Type Custom -KeyUsage DigitalSignature -Subject "CN=SANDRO00O" -CertStoreLocation "Cert:\CurrentUser\My" -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}") -FriendlyName "xemu Xbox One M1 Development"
+          $password = ConvertTo-SecureString -String "xemu-xbox-one-m1" -Force -AsPlainText
+          Export-PfxCertificate -Cert $cert -FilePath "$env:RUNNER_TEMP\xemu-xbox-one-m1.pfx" -Password $password
+          Export-Certificate -Cert $cert -FilePath "xemu-xbox-one-m1.cer" | Out-Null
+
+      - name: Package and sign
+        shell: pwsh
+        run: |
+          $sdk = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*" -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          $makeappx = Join-Path $sdk.FullName "x64\makeappx.exe"
+          $signtool = Join-Path $sdk.FullName "x64\signtool.exe"
+          & $makeappx pack /d appx /p xemu-xbox-one-m1.appx
+          & $signtool sign /fd SHA256 /a /f "$env:RUNNER_TEMP\xemu-xbox-one-m1.pfx" /p "xemu-xbox-one-m1" xemu-xbox-one-m1.appx
+
+      - name: Upload Xbox package
+        uses: actions/upload-artifact@v4
+        with:
+          name: xemu-xbox-one-m1
+          path: |
+            xemu-xbox-one-m1.appx
+            xemu-xbox-one-m1.cer
