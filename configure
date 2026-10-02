@@ -1999,7 +1999,9 @@ if test "$skip_meson" = no; then
   test "$plugins" = yes && meson_option_add "-Dplugins=true"
   test "$tcg" != enabled && meson_option_add "-Dtcg=$tcg"
   test -n "$gdb_bin" && meson_option_add "-Dgdb=$gdb_bin"
-  test "$XBOXONE_BUILD" = "1" && meson_option_add "-Dxboxone=true"
+  if test "$XBOXONE_BUILD" = "1"; then
+    meson_option_add "-Dxboxone=true" "-Dsdl=disabled" "-Dopengl=disabled" "-Dsdl_image=disabled"
+  fi
 
   run_meson() {
     NINJA=$ninja $meson setup "$@" "$PWD" "$source_path"
