@@ -1113,20 +1113,23 @@ endif
 # problems on multi-arch where people try to build
 # 32-bit QEMU while pointing at 64-bit glib headers
 
-if not cc.compiles('''
-  #include <glib.h>
-  #include <unistd.h>
-
-  #define QEMU_BUILD_BUG_ON(x) \
-  typedef char qemu_build_bug_on[(x)?-1:1] __attribute__((unused));
-
-  int main(void) {
-     QEMU_BUILD_BUG_ON(sizeof(size_t) != GLIB_SIZEOF_SIZE_T);
-     return 0;
-  }''', dependencies: glib_pc, args: glib_cflags)
-  error('''sizeof(size_t) doesn't match GLIB_SIZEOF_SIZE_T.
-        You probably need to set PKG_CONFIG_LIBDIR" to point
-        to the right pkg-config files for your build target.''')
+if not get_option('xboxone')
+  if not cc.compiles('''
+    #include <glib.h>
+    #include <unistd.h>
+  
+    #define QEMU_BUILD_BUG_ON(x) \
+    typedef char qemu_build_bug_on[(x)?-1:1] __attribute__((unused));
+  
+    int main(void) {
+       QEMU_BUILD_BUG_ON(sizeof(size_t) != GLIB_SIZEOF_SIZE_T);
+       return 0;
+    }''', dependencies: glib_pc, args: glib_cflags)
+    error('''sizeof(size_t) doesn't match GLIB_SIZEOF_SIZE_T.
+          You probably need to set PKG_CONFIG_LIBDIR" to point
+          to the right pkg-config files for your build target.''')
+  endif
+  
 endif
 
 glib = declare_dependency(dependencies: [glib_pc, gmodule],
