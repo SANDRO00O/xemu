@@ -20,19 +20,29 @@ system_ss.add(files(
 subdir('thirdparty')
 
 xemu_ss = ss.source_set()
-xemu_ss.add(files(
-  'xemu-input.c',
-  'xemu-monitor.c',
-  'xemu-net.c',
-  'xemu-settings.cc',
-  'xemu-controllers.cc',
+if get_option('xboxone')
+  xemu_ss.add(files(
+    'xemu-settings.cc',
+    'xemu-controllers.cc',
+    'xemu-data.c',
+    'xboxone.c',
+    'xboxone-main.cc',
+  ))
+else
+  xemu_ss.add(files(
+    'xemu-input.c',
+    'xemu-monitor.c',
+    'xemu-net.c',
+    'xemu-settings.cc',
+    'xemu-controllers.cc',
 
-  'xemu.c',
-  'xemu-data.c',
-  'xemu-snapshots.c',
-  'xemu-thumbnail.cc',
-  'xemu-widescreen.c',
-))
+    'xemu.c',
+    'xemu-data.c',
+    'xemu-snapshots.c',
+    'xemu-thumbnail.cc',
+    'xemu-widescreen.c',
+  ))
+endif
 
 if host_os == 'windows'
   d3d11 = cc.find_library('d3d11', required: true)
@@ -40,7 +50,9 @@ if host_os == 'windows'
   xemu_ss.add(nvapi, d3d11, dxgi)
 endif
 
-subdir('xui')
+if not get_option('xboxone')
+  subdir('xui')
+endif
 
 if host_os == 'darwin'
   xemu_cocoa = dependency('appleframeworks', modules: 'Cocoa')
@@ -54,7 +66,11 @@ elif host_os == 'windows'
 elif host_os == 'darwin'
   xemu_ss.add(files('xemu-os-utils-macos.m'))
 endif
-xemu_ss.add(imgui, implot, stb_image, sdl, opengl, fa, fpng, json, fatx, tomlplusplus, genconfig)
+if get_option('xboxone')
+  xemu_ss.add(sdl, tomlplusplus, genconfig)
+else
+  xemu_ss.add(imgui, implot, stb_image, sdl, opengl, fa, fpng, json, fatx, tomlplusplus, genconfig)
+endif
 system_ss.add_all(xemu_ss)
 
 system_ss.add(when: pixman, if_true: files('console-vc.c'), if_false: files('console-vc-stubs.c'))
