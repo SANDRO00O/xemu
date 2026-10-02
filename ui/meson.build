@@ -44,7 +44,7 @@ else
   ))
 endif
 
-if host_os == 'windows'
+if host_os == 'windows' and not get_option('xboxone')
   d3d11 = cc.find_library('d3d11', required: true)
   dxgi = cc.find_library('dxgi', required: true)
   xemu_ss.add(nvapi, d3d11, dxgi)
@@ -61,7 +61,7 @@ endif
 
 if host_os == 'linux'
   xemu_ss.add([gtk, files('xemu-os-utils-linux.c')])
-elif host_os == 'windows'
+elif host_os == 'windows' and not get_option('xboxone')
   xemu_ss.add(files('xemu-os-utils-windows.c'))
 elif host_os == 'darwin'
   xemu_ss.add(files('xemu-os-utils-macos.m'))
