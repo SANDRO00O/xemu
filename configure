@@ -2000,7 +2000,7 @@ if test "$skip_meson" = no; then
   test "$tcg" != enabled && meson_option_add "-Dtcg=$tcg"
   test -n "$gdb_bin" && meson_option_add "-Dgdb=$gdb_bin"
   if test "$XBOXONE_BUILD" = "1"; then
-    meson_option_add "-Dxboxone=true" "-Dsdl=disabled" "-Dopengl=disabled" "-Dsdl_image=disabled"
+    meson_option_add "-Dxboxone=true" "-Dopengl=disabled" "-Dsdl_image=disabled"
   fi
 
   run_meson() {
