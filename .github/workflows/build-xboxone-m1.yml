@@ -41,8 +41,21 @@ jobs:
           Write-Host "Using MSVC linker: $msvcLink"
 
       - name: Generate QEMU host configuration
-        shell: bash
-        run: XBOXONE_BUILD=1 PATH="$PWD/ci-tools:$PATH" PKG_CONFIG=C:/msys64/ucrt64/bin/pkg-config.exe CC=clang-cl CXX=clang-cl ./configure --target-list=i386-softmmu --disable-werror --disable-sdl --disable-opengl
+        shell: pwsh
+        run: |
+          @"
+          # Automatically generated for the Xbox One Meson build
+          SRC_PATH=$env:GITHUB_WORKSPACE
+          TARGET_DIRS=i386-softmmu
+          GDB=
+          SUBDIRS=
+          PYTHON=
+          MKVENV_ENSUREGROUP=
+          GENISOIMAGE=
+          MESON=
+          NINJA=
+          EXESUF=.exe
+          "@ | Set-Content -Encoding ascii config-host.mak
 
       - name: Configure
         shell: pwsh
