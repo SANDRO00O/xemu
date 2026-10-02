@@ -42,7 +42,7 @@ jobs:
 
       - name: Generate QEMU host configuration
         shell: bash
-        run: PATH="$PWD/ci-tools:$PATH" PKG_CONFIG=/c/msys64/ucrt64/bin/pkg-config.exe CC=clang-cl CXX=clang-cl ./configure --target-list=i386-softmmu --disable-werror --disable-sdl --disable-opengl
+        run: PATH="$PWD/ci-tools:$PATH" PKG_CONFIG=C:/msys64/ucrt64/bin/pkg-config.exe CC=clang-cl CXX=clang-cl ./configure --target-list=i386-softmmu --disable-werror --disable-sdl --disable-opengl
 
       - name: Configure
         shell: pwsh
