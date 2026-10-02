@@ -115,6 +115,7 @@ if curses.found()
   ui_modules += {'curses' : curses_ss}
 endif
 
+if not get_option('xboxone')
 system_ss.add(opengl)
 if opengl.found()
   opengl_ss = ss.source_set()
@@ -207,6 +208,7 @@ endif
 
 endif # xemu_enable_extra_ui_modules
 
+endif
 keymaps = [
   ['atset1', 'qcode'],
   ['linux', 'qcode'],
