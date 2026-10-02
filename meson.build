@@ -1901,10 +1901,13 @@ if not get_option('coreaudio').auto() or (host_os == 'darwin' and have_system)
                          required: get_option('coreaudio'))
 endif
 
-epoxy = dependency('epoxy', required: true)
+epoxy = not_found
+if not get_option('xboxone')
+  epoxy = dependency('epoxy', required: true)
+endif
 
 opengl = not_found
-if not get_option('opengl').auto() or have_system or have_vhost_user_gpu
+if not get_option('xboxone') and (not get_option('opengl').auto() or have_system or have_vhost_user_gpu)
   # FIXME: Use meson's 'gl' dep
   if host_os == 'darwin'
     opengl_libs=['-framework', 'OpenGL']
