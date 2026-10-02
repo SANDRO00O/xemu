@@ -31,7 +31,9 @@ jobs:
 
       - name: Configure
         shell: pwsh
-        run: py -m mesonbuild.mesonmain setup build-xboxone -Dxboxone=true -Dx86_version=1 -Dopengl=disabled -Dsdl=enabled -Dsdl_image=disabled -Db_lto=false -Dbuildtype=debug
+        run: |
+          $env:PATH = (($env:PATH -split ';') | Where-Object { $_ -notlike '*\\Git\\usr\\bin' }) -join ';'
+          py -m mesonbuild.mesonmain setup build-xboxone -Dxboxone=true -Dx86_version=1 -Dopengl=disabled -Dsdl=enabled -Dsdl_image=disabled -Db_lto=false -Dbuildtype=debug
 
       - name: Build
         shell: pwsh
