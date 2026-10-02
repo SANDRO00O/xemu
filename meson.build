@@ -4637,7 +4637,7 @@ foreach target : target_dirs
       'sources': get_option('xboxone') ? files('ui/xboxone.c', 'ui/xboxone-main.cc') : files('system/main.c'),
       'dependencies': [sdl]
     }]
-    if host_os == 'windows' and (sdl.found() or gtk.found())
+    if host_os == 'windows' and not get_option('xboxone') and (sdl.found() or gtk.found())
       execs += [{
         'name': 'qemu-system-' + target_name + 'w',
         'win_subsystem': 'windows',
