@@ -25,6 +25,12 @@ jobs:
         shell: pwsh
         run: py -m pip install --upgrade meson ninja
 
+      - name: Install MSYS2 GLib and pkg-config
+        shell: pwsh
+        run: |
+          & C:\\msys64\\usr\\bin\\pacman.exe -Sy --noconfirm
+          & C:\\msys64\\usr\\bin\\pacman.exe -S --noconfirm mingw-w64-ucrt-x86_64-glib2 mingw-w64-ucrt-x86_64-pkgconf
+
       - name: Stage MSVC linker for Git Bash
         shell: pwsh
         run: |
@@ -36,7 +42,7 @@ jobs:
 
       - name: Generate QEMU host configuration
         shell: bash
-        run: PATH="$PWD/ci-tools:$PATH" CC=clang-cl CXX=clang-cl ./configure --target-list=i386-softmmu --disable-werror --disable-sdl --disable-opengl
+        run: PATH="$PWD/ci-tools:$PATH" PKG_CONFIG=/c/msys64/ucrt64/bin/pkg-config.exe CC=clang-cl CXX=clang-cl ./configure --target-list=i386-softmmu --disable-werror --disable-sdl --disable-opengl
 
       - name: Configure
         shell: pwsh
