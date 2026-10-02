@@ -27,6 +27,11 @@ fs = import('fs')
 host_os = host_machine.system()
 config_host = keyval.load(meson.current_build_dir() / 'config-host.mak')
 
+if get_option('xboxone')
+  add_project_arguments('-DXBOXONE_BUILD=1', language: ['c', 'cpp'])
+  add_project_link_arguments('/APPCONTAINER', language: ['c', 'cpp'])
+endif
+
 # Temporary directory used for files created while
 # configure runs. Since it is in the build directory
 # we can safely blow away any previous version of it
@@ -1694,7 +1699,15 @@ if not get_option('sdl').auto() or have_system
       'SDL_VIRTUAL_JOYSTICK': 'OFF',
       'SDL_X11_XTEST': 'OFF',
     })
-    sdl3_sp = cmake.subproject('sdl3', options: sdl3_cmake_opts, required: get_option('sdl'))
+    sdl3_project = get_option('xboxone') ? 'sdl3-uwp' : 'sdl3'
+    if get_option('xboxone')
+      sdl3_cmake_opts.add_cmake_defines({
+        'WINDOWS_STORE': 'ON',
+        'SDL_TESTS': 'OFF',
+        'SDL_EXAMPLES': 'OFF',
+      })
+    endif
+    sdl3_sp = cmake.subproject(sdl3_project, options: sdl3_cmake_opts, required: get_option('sdl'))
     if sdl3_sp.found()
       sdl = sdl3_sp.dependency('SDL3-static')
       meson.override_dependency('sdl3', sdl)
