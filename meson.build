@@ -4661,6 +4661,9 @@ foreach target : target_dirs
   endif
   foreach exe: execs
     exe_name = exe['name']
+    if get_option('xboxone')
+      exe_name = 'xemu-xboxone'
+    endif
     if host_os == 'darwin'
       exe_name += '-unsigned'
     endif
