@@ -1,4 +1,5 @@
 name: Build Xbox One M1 UWP
+# M1: UWP shell + xemu core + NV2A Null renderer; D3D12 is deferred.
 
 on:
   workflow_dispatch:
