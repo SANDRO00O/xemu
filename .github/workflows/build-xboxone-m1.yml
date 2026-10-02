@@ -50,6 +50,7 @@ jobs:
           $env:PATH = (($env:PATH -split ';') | Where-Object { $_ -notlike '*\Git\usr\bin' }) -join ';'
           $env:CC = 'clang-cl'
           $env:CXX = 'clang-cl'
+          $env:PKG_CONFIG = 'C:\\msys64\\ucrt64\\bin\\pkg-config.exe'
           py -m mesonbuild.mesonmain setup build-xboxone -Dxboxone=true -Dx86_version=1 -Dopengl=disabled -Dsdl=enabled -Dsdl_image=disabled -Db_lto=false -Dbuildtype=debug
 
       - name: Build
