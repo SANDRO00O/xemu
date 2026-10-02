@@ -28,12 +28,12 @@ static atomic_bool qemu_initialized;
 static atomic_bool qemu_finished;
 static atomic_int qemu_exit_status;
 
-static void xemu_queue_error_message(const char *message)
+void xemu_queue_error_message(const char *message)
 {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "xemu: %s", message);
 }
 
-static void xemu_queue_notification(const char *message)
+void xemu_queue_notification(const char *message)
 {
     SDL_Log("xemu: %s", message);
 }
