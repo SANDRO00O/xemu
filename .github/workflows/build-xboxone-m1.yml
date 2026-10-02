@@ -40,31 +40,17 @@ jobs:
           Copy-Item $msvcLink ci-tools\\link.exe -Force
           Write-Host "Using MSVC linker: $msvcLink"
 
-      - name: Generate QEMU host configuration
-        shell: pwsh
-        run: |
-          @"
-          # Automatically generated for the Xbox One Meson build
-          SRC_PATH=$env:GITHUB_WORKSPACE
-          TARGET_DIRS=i386-softmmu
-          GDB=
-          SUBDIRS=
-          PYTHON=
-          MKVENV_ENSUREGROUP=
-          GENISOIMAGE=
-          MESON=
-          NINJA=
-          EXESUF=.exe
-          "@ | Set-Content -Encoding ascii config-host.mak
-
       - name: Configure
-        shell: pwsh
+        shell: bash
+        env:
+          XBOXONE_BUILD: "1"
+          CC: clang-cl
+          CXX: clang-cl
+          PKG_CONFIG: 'C:/msys64/ucrt64/bin/pkg-config.exe'
         run: |
-          $env:PATH = (($env:PATH -split ';') | Where-Object { $_ -notlike '*\Git\usr\bin' }) -join ';'
-          $env:CC = 'clang-cl'
-          $env:CXX = 'clang-cl'
-          $env:PKG_CONFIG = 'C:\\msys64\\ucrt64\\bin\\pkg-config.exe'
-          py -m mesonbuild.mesonmain setup build-xboxone -Dxboxone=true -Dx86_version=1 -Dopengl=disabled -Dsdl=enabled -Dsdl_image=disabled -Db_lto=false -Dbuildtype=debug
+          mkdir -p build-xboxone
+          cd build-xboxone
+          ../configure --target-list=i386-softmmu --disable-werror
 
       - name: Build
         shell: pwsh
