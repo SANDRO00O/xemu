@@ -521,6 +521,14 @@ case "$cpu" in
     ;;
 esac
 
+# clang-cl on Windows already targets the selected x64 MSVC environment.
+# Passing QEMU's GCC-style -m64 as part of the Meson compiler command causes
+# CMake subprojects (notably SDL3) to mistake the flag for the compiler path.
+# Keep CPU_CFLAGS for normal builds, but omit it for the Xbox One UWP build.
+if test "$XBOXONE_BUILD" = "1" && test "$cpu" = "x86_64"; then
+  CPU_CFLAGS=""
+fi
+
 if test -n "$host_arch" && {
     ! test -d "$source_path/linux-user/include/host/$host_arch" ||
     ! test -d "$source_path/common-user/host/$host_arch"; }; then
