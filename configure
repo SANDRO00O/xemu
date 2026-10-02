@@ -993,9 +993,13 @@ get_pwd() {
     fi
 }
 
-meson="$(cd pyvenv/bin; get_pwd)/meson"
+meson="$(cd pyvenv/bin 2>/dev/null && get_pwd)/meson"
 if [ -f "$meson$EXESUF" ]; then
   meson="$meson$EXESUF"
+elif [ -f "pyvenv/Scripts/meson.exe" ]; then
+  meson="$(cd pyvenv/Scripts && pwd)/meson.exe"
+else
+  error_exit "Meson executable not found in pyvenv/bin or pyvenv/Scripts."
 fi
 
 # Conditionally ensure Sphinx is installed.
