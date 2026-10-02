@@ -3,6 +3,7 @@ name: Build Xbox One M1 UWP
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
     branches:
       - xbox-one-m1
