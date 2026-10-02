@@ -25,8 +25,6 @@ if get_option('xboxone')
     'xemu-settings.cc',
     'xemu-controllers.cc',
     'xemu-data.c',
-    'xboxone.c',
-    'xboxone-main.cc',
   ))
 else
   xemu_ss.add(files(
