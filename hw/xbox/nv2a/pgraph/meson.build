@@ -12,7 +12,9 @@ if have_renderdoc
 endif
 subdir('thirdparty')
 subdir('null')
-subdir('gl')
-subdir('glsl')
-subdir('vk')
+if not get_option('xboxone')
+  subdir('gl')
+  subdir('glsl')
+  subdir('vk')
+endif
 specific_ss.add(nv2a_vsh_cpu)
