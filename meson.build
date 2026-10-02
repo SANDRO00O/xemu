@@ -29,6 +29,9 @@ config_host = keyval.load(meson.current_build_dir() / 'config-host.mak')
 
 if get_option('xboxone')
   add_project_arguments('-DXBOXONE_BUILD=1', language: ['c', 'cpp'])
+  add_project_arguments('/DWINAPI_FAMILY=WINAPI_FAMILY_APP', language: ['c', 'cpp'])
+  add_project_arguments('/DUNICODE', '/D_UNICODE', language: ['c', 'cpp'])
+  add_project_arguments('/ZW', '/EHsc', language: 'cpp')
   add_project_link_arguments('/APPCONTAINER', language: ['c', 'cpp'])
 endif
 
