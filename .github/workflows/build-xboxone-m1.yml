@@ -25,9 +25,18 @@ jobs:
         shell: pwsh
         run: py -m pip install --upgrade meson ninja
 
+      - name: Stage MSVC linker for Git Bash
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force ci-tools | Out-Null
+          $msvcLink = (Get-Command link.exe -CommandType Application | Select-Object -First 1).Source
+          if (-not $msvcLink) { throw "MSVC link.exe not found" }
+          Copy-Item $msvcLink ci-tools\\link.exe -Force
+          Write-Host "Using MSVC linker: $msvcLink"
+
       - name: Generate QEMU host configuration
         shell: bash
-        run: CC=cl CXX=cl ./configure --target-list=i386-softmmu --disable-werror --disable-sdl --disable-opengl
+        run: PATH="$PWD/ci-tools:$PATH" CC=cl CXX=cl ./configure --target-list=i386-softmmu --disable-werror --disable-sdl --disable-opengl
 
       - name: Configure
         shell: pwsh
