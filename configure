@@ -1155,6 +1155,11 @@ fi
 
 ##########################################
 # big/little endian test
+# MSVC does not expose the GCC-style byte-order macros used by this probe.
+# Windows is little-endian, so avoid the probe on native Windows hosts.
+if test "$host_os" = "windows"; then
+  bigendian="no"
+else
 cat > $TMPC << EOF
 #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 # error LITTLE
@@ -1178,6 +1183,7 @@ EOF
     echo big/little test failed
     exit 1
   fi
+fi
 fi
 
 ##########################################
