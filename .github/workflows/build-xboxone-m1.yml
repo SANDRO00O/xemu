@@ -27,7 +27,7 @@ jobs:
 
       - name: Generate QEMU host configuration
         shell: bash
-        run: CC=cl CXX=cl ./configure --target-list=i386-softmmu --disable-werror --disable-sdl --disable-opengl --disable-vulkan
+        run: CC=cl CXX=cl ./configure --target-list=i386-softmmu --disable-werror --disable-sdl --disable-opengl
 
       - name: Configure
         shell: pwsh
