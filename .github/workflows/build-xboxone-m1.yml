@@ -25,6 +25,10 @@ jobs:
         shell: pwsh
         run: py -m pip install --upgrade meson ninja
 
+      - name: Generate QEMU host configuration
+        shell: bash
+        run: ./configure --target-list=i386-softmmu --disable-werror
+
       - name: Configure
         shell: pwsh
         run: py -m mesonbuild.mesonmain setup build-xboxone -Dxboxone=true -Dx86_version=1 -Dopengl=disabled -Dsdl=enabled -Dsdl_image=disabled -Db_lto=false -Dbuildtype=debug
