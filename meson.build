@@ -31,6 +31,8 @@ if get_option('xboxone')
   add_project_arguments('-DXBOXONE_BUILD=1', language: ['c', 'cpp'])
   add_project_arguments('/DWINAPI_FAMILY=WINAPI_FAMILY_APP', language: ['c', 'cpp'])
   add_project_arguments('/DUNICODE', '/D_UNICODE', language: ['c', 'cpp'])
+  add_project_arguments('/D_CRT_SECURE_NO_WARNINGS', '/D_WINSOCK_DEPRECATED_NO_WARNINGS', language: ['c', 'cpp'])
+  add_project_arguments('/clang:-include', meson.current_source_dir() / 'xboxone/win32-compat.h', language: 'c')
   add_project_arguments('/ZW', '/EHsc', language: 'cpp')
   add_project_link_arguments('/APPCONTAINER', language: ['c', 'cpp'])
 endif
