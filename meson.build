@@ -27,6 +27,16 @@ fs = import('fs')
 host_os = host_machine.system()
 config_host = keyval.load(meson.current_build_dir() / 'config-host.mak')
 
+if get_option('xboxone')
+  add_project_arguments('-DXBOXONE_BUILD=1', language: ['c', 'cpp'])
+  add_project_arguments('/DWINAPI_FAMILY=WINAPI_FAMILY_APP', language: ['c', 'cpp'])
+  add_project_arguments('/DUNICODE', '/D_UNICODE', language: ['c', 'cpp'])
+  add_project_arguments('/D_CRT_SECURE_NO_WARNINGS', '/D_WINSOCK_DEPRECATED_NO_WARNINGS', language: ['c', 'cpp'])
+  add_project_arguments('/clang:-include', meson.current_source_dir() / 'xboxone/win32-compat.h', language: 'c')
+  add_project_arguments('/ZW', '/EHsc', language: 'cpp')
+  add_project_link_arguments('/APPCONTAINER', language: ['c', 'cpp'])
+endif
+
 # Temporary directory used for files created while
 # configure runs. Since it is in the build directory
 # we can safely blow away any previous version of it
@@ -183,7 +193,7 @@ endforeach
 # xemu Version
 ###########################################
 
-xemu_version_cmd = [find_program('scripts/xemu-version.sh'),
+xemu_version_cmd = [find_program('scripts/xemu-version.py'),
                     meson.current_source_dir()]
 xemu_version = custom_target('xemu-version-macro.h',
                              output: 'xemu-version-macro.h',
@@ -356,7 +366,7 @@ foreach lang : all_languages
   compiler = meson.get_compiler(lang)
   if compiler.get_id() == 'gcc' and compiler.version().version_compare('>=7.4')
     # ok
-  elif compiler.get_id() == 'clang' and compiler.compiles('''
+  elif compiler.get_id() in ['clang', 'clang-cl'] and compiler.compiles('''
       #ifdef __apple_build_version__
       # if __clang_major__ < 15 || (__clang_major__ == 15 && __clang_minor__ < 0)
       #  error You need at least XCode Clang v15.0 to compile QEMU
@@ -1105,20 +1115,23 @@ endif
 # problems on multi-arch where people try to build
 # 32-bit QEMU while pointing at 64-bit glib headers
 
-if not cc.compiles('''
-  #include <glib.h>
-  #include <unistd.h>
-
-  #define QEMU_BUILD_BUG_ON(x) \
-  typedef char qemu_build_bug_on[(x)?-1:1] __attribute__((unused));
-
-  int main(void) {
-     QEMU_BUILD_BUG_ON(sizeof(size_t) != GLIB_SIZEOF_SIZE_T);
-     return 0;
-  }''', dependencies: glib_pc, args: glib_cflags)
-  error('''sizeof(size_t) doesn't match GLIB_SIZEOF_SIZE_T.
-        You probably need to set PKG_CONFIG_LIBDIR" to point
-        to the right pkg-config files for your build target.''')
+if not get_option('xboxone')
+  if not cc.compiles('''
+    #include <glib.h>
+    #include <unistd.h>
+  
+    #define QEMU_BUILD_BUG_ON(x) \
+    typedef char qemu_build_bug_on[(x)?-1:1] __attribute__((unused));
+  
+    int main(void) {
+       QEMU_BUILD_BUG_ON(sizeof(size_t) != GLIB_SIZEOF_SIZE_T);
+       return 0;
+    }''', dependencies: glib_pc, args: glib_cflags)
+    error('''sizeof(size_t) doesn't match GLIB_SIZEOF_SIZE_T.
+          You probably need to set PKG_CONFIG_LIBDIR" to point
+          to the right pkg-config files for your build target.''')
+  endif
+  
 endif
 
 glib = declare_dependency(dependencies: [glib_pc, gmodule],
@@ -1685,7 +1698,7 @@ if not get_option('sdl').auto() or have_system
       'SDL_HAPTIC': 'OFF',
       'SDL_LIBTHAI': 'OFF',
       'SDL_POWER': 'OFF',
-      'SDL_RENDER': 'OFF',
+      'SDL_RENDER': 'ON',
       'SDL_SENSOR': 'OFF',
       'SDL_SHARED': 'OFF',
       'SDL_STATIC': 'ON',
@@ -1694,7 +1707,15 @@ if not get_option('sdl').auto() or have_system
       'SDL_VIRTUAL_JOYSTICK': 'OFF',
       'SDL_X11_XTEST': 'OFF',
     })
-    sdl3_sp = cmake.subproject('sdl3', options: sdl3_cmake_opts, required: get_option('sdl'))
+    sdl3_project = get_option('xboxone') ? 'sdl3-uwp' : 'sdl3'
+    if get_option('xboxone')
+      sdl3_cmake_opts.add_cmake_defines({
+        'WINDOWS_STORE': 'ON',
+        'SDL_TESTS': 'OFF',
+        'SDL_EXAMPLES': 'OFF',
+      })
+    endif
+    sdl3_sp = cmake.subproject(sdl3_project, options: sdl3_cmake_opts, required: get_option('sdl'))
     if sdl3_sp.found()
       sdl = sdl3_sp.dependency('SDL3-static')
       meson.override_dependency('sdl3', sdl)
@@ -1882,10 +1903,13 @@ if not get_option('coreaudio').auto() or (host_os == 'darwin' and have_system)
                          required: get_option('coreaudio'))
 endif
 
-epoxy = dependency('epoxy', required: true)
+epoxy = not_found
+if not get_option('xboxone')
+  epoxy = dependency('epoxy', required: true)
+endif
 
 opengl = not_found
-if not get_option('opengl').auto() or have_system or have_vhost_user_gpu
+if not get_option('xboxone') and (not get_option('opengl').auto() or have_system or have_vhost_user_gpu)
   # FIXME: Use meson's 'gl' dep
   if host_os == 'darwin'
     opengl_libs=['-framework', 'OpenGL']
@@ -4618,14 +4642,14 @@ foreach target : target_dirs
     execs = [{
       'name': 'qemu-system-' + target_name,
       'win_subsystem': 'console',
-      'sources': files('system/main.c'),
+      'sources': get_option('xboxone') ? files('ui/xboxone.c', 'ui/xboxone-main.cc') : files('system/main.c'),
       'dependencies': [sdl]
     }]
-    if host_os == 'windows' and (sdl.found() or gtk.found())
+    if host_os == 'windows' and not get_option('xboxone') and (sdl.found() or gtk.found())
       execs += [{
         'name': 'qemu-system-' + target_name + 'w',
         'win_subsystem': 'windows',
-        'sources': files('system/main.c'),
+        'sources': get_option('xboxone') ? files('ui/xboxone.c') : files('system/main.c'),
         'dependencies': [sdl]
       }]
     endif
@@ -4648,6 +4672,9 @@ foreach target : target_dirs
   endif
   foreach exe: execs
     exe_name = exe['name']
+    if get_option('xboxone')
+      exe_name = 'xemu-xboxone'
+    endif
     if host_os == 'darwin'
       exe_name += '-unsigned'
     endif

@@ -1,6 +1,6 @@
 [wrap-git]
-url = https://github.com/libsdl-org/SDL
-revision = fa2c02bb6e21974a89ea9824bc53c9932abe5f9c
+url = https://github.com/XboxEmulationHub/SDL3-uwp
+revision = ddd5d4f99a26ac95d4620ccf489c07fcf5f08636
 depth = 1
 method = cmake
 
@@ -8,4 +8,4 @@ method = cmake
 dependency_names = sdl3
 
 [update]
-tag_regex = ^release-\d+\.\d+\.\d+$
+tag_regex = ^release-uwp-\d+\.\d+\.\d+$

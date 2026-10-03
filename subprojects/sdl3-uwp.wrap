@@ -1,0 +1,5 @@
+[wrap-git]
+url = https://github.com/XboxEmulationHub/SDL3-uwp
+revision = uwp-3.4.16
+depth = 1
+method = cmake
