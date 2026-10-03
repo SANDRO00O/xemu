@@ -14,7 +14,8 @@ XEMU_COMMIT=$( \
 XEMU_VERSION=$( \
   cd "$dir"; \
   if test -e .git; then \
-    git describe --tags --match 'v*' 2>/dev/null | cut -c 2- | tr -d '\n' || true; \
+    version=$(git describe --tags --match 'v*' 2>/dev/null || true); \
+    printf '%s' "$version" | cut -c 2- | tr -d '\n'; \
   elif test -e XEMU_VERSION; then \
     cat XEMU_VERSION; \
   fi)
