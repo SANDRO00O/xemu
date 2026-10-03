@@ -1,0 +1,14 @@
+diff --git a/src/util.h b/src/util.h
+index 0000000..0000000 100644
+--- a/src/util.h
++++ b/src/util.h
+@@ -35,6 +35,10 @@
+ #include <errno.h>
+ #include <unistd.h>
+ #include <sys/types.h>
++#ifdef _WIN32
++#include "../../../xboxone/win32-compat.h"
++#endif
+ #include <sys/stat.h>
+ #include <unistd.h>
+ #include <inttypes.h>
