@@ -1,35 +1,18 @@
 #!/bin/bash
 
-set -u
-
 dir="$1"
-XEMU_DATE=$(date -u)
+
+XEMU_VERSION="0.0.0"
 XEMU_COMMIT=""
+XEMU_DATE=""
 
-if cd "$dir"; then
-  if test -e .git; then
-    XEMU_COMMIT=$(git rev-parse HEAD 2>/dev/null || true)
-    XEMU_COMMIT=$(printf '%s' "$XEMU_COMMIT" | tr -d '\n')
-  elif test -e XEMU_COMMIT; then
-    XEMU_COMMIT=$(cat XEMU_COMMIT 2>/dev/null || true)
+if test -d "$dir"; then
+  XEMU_DATE=$(date -u 2>/dev/null || printf 'unknown')
+  XEMU_COMMIT=$(git -C "$dir" rev-parse HEAD 2>/dev/null || printf '')
+  version=$(git -C "$dir" describe --tags --match 'v*' 2>/dev/null || printf '')
+  if test -n "$version"; then
+    XEMU_VERSION=${version#v}
   fi
-fi
-
-XEMU_VERSION=""
-
-if cd "$dir"; then
-  if test -e .git; then
-    version=$(git describe --tags --match 'v*' 2>/dev/null || true)
-    if test -n "$version"; then
-      XEMU_VERSION=${version#v}
-    fi
-  elif test -e XEMU_VERSION; then
-    XEMU_VERSION=$(cat XEMU_VERSION 2>/dev/null || true)
-  fi
-fi
-
-if test -z "$XEMU_VERSION"; then
-  XEMU_VERSION="0.0.0"
 fi
 
 get_version_field() {
@@ -59,3 +42,5 @@ cat <<EOF
 #define XEMU_COMMIT        "$XEMU_COMMIT"
 #define XEMU_DATE          "$XEMU_DATE"
 EOF
+
+exit 0
