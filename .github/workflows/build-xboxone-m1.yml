@@ -23,7 +23,7 @@ jobs:
 
       - name: Install Meson and Ninja
         shell: pwsh
-        run: py -m pip install --upgrade meson ninja
+        run: py -m pip install --upgrade meson ninja pyyaml
 
       - name: Install MSYS2 GLib and pkg-config
         shell: pwsh
