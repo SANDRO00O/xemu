@@ -28,7 +28,8 @@ if not fs.exists(lib)
     message('Downloading dsp56300 @0@ for @1@...'.format(ver, rust_target))
     run_command(find_program('curl'), '-fsSL', url, '-o', src_archive, check: true)
   endif
-  run_command('tar', 'xzf', src_archive, '-C', meson.current_build_dir(), check: true)
+  python = find_program('python', 'python3', required: true)
+  run_command(python, '-c', 'import sys, tarfile; tarfile.open(sys.argv[1], "r:gz").extractall(sys.argv[2])', src_archive, meson.current_build_dir(), check: true)
 endif
 
 link_args = []
