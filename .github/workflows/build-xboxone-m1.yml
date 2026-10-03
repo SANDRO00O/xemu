@@ -29,7 +29,7 @@ jobs:
         shell: pwsh
         run: |
           & C:\\msys64\\usr\\bin\\pacman.exe -Sy --noconfirm
-          & C:\\msys64\\usr\\bin\\pacman.exe -S --noconfirm mingw-w64-ucrt-x86_64-glib2 mingw-w64-ucrt-x86_64-pkgconf
+          & C:\\msys64\\usr\\bin\\pacman.exe -S --noconfirm mingw-w64-ucrt-x86_64-glib2 mingw-w64-ucrt-x86_64-pkgconf mingw-w64-ucrt-x86_64-libsamplerate
 
       - name: Stage MSVC linker for Git Bash
         shell: pwsh
