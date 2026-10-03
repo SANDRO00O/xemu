@@ -1696,7 +1696,7 @@ if not get_option('sdl').auto() or have_system
       'SDL_HAPTIC': 'OFF',
       'SDL_LIBTHAI': 'OFF',
       'SDL_POWER': 'OFF',
-      'SDL_RENDER': 'OFF',
+      'SDL_RENDER': 'ON',
       'SDL_SENSOR': 'OFF',
       'SDL_SHARED': 'OFF',
       'SDL_STATIC': 'ON',
