@@ -1,41 +1,54 @@
 #!/bin/bash
 
-set -eu
+set -u
 
 dir="$1"
 XEMU_DATE=$(date -u)
-XEMU_COMMIT=$( \
-  cd "$dir"; \
-  if test -e .git; then \
-    git rev-parse HEAD 2>/dev/null | tr -d '\n'; \
-  elif test -e XEMU_COMMIT; then \
-    cat XEMU_COMMIT; \
-  fi)
-XEMU_VERSION=$( \
-  cd "$dir"; \
-  if test -e .git; then \
-    version=$(git describe --tags --match 'v*' 2>/dev/null || true); \
-    printf '%s' "$version" | cut -c 2- | tr -d '\n'; \
-  elif test -e XEMU_VERSION; then \
-    cat XEMU_VERSION; \
-  fi)
+XEMU_COMMIT=""
 
-if [[ "${XEMU_VERSION}" == "" ]]; then
+if cd "$dir"; then
+  if test -e .git; then
+    XEMU_COMMIT=$(git rev-parse HEAD 2>/dev/null || true)
+    XEMU_COMMIT=$(printf '%s' "$XEMU_COMMIT" | tr -d '\n')
+  elif test -e XEMU_COMMIT; then
+    XEMU_COMMIT=$(cat XEMU_COMMIT 2>/dev/null || true)
+  fi
+fi
+
+XEMU_VERSION=""
+
+if cd "$dir"; then
+  if test -e .git; then
+    version=$(git describe --tags --match 'v*' 2>/dev/null || true)
+    if test -n "$version"; then
+      XEMU_VERSION=${version#v}
+    fi
+  elif test -e XEMU_VERSION; then
+    XEMU_VERSION=$(cat XEMU_VERSION 2>/dev/null || true)
+  fi
+fi
+
+if test -z "$XEMU_VERSION"; then
   XEMU_VERSION="0.0.0"
 fi
 
 get_version_field() {
-  echo ${XEMU_VERSION}-0 | cut -d- -f$1
+  printf '%s\n' "${XEMU_VERSION}-0" | cut -d- -f"$1"
 }
 
-get_version_dot () {
-  echo $(get_version_field 1) | cut -d. -f$1
+get_version_dot() {
+  get_version_field 1 | cut -d. -f"$1"
 }
 
 XEMU_VERSION_MAJOR=$(get_version_dot 1)
 XEMU_VERSION_MINOR=$(get_version_dot 2)
 XEMU_VERSION_PATCH=$(get_version_dot 3)
 XEMU_VERSION_COMMIT=$(get_version_field 2)
+
+test -n "$XEMU_VERSION_MAJOR" || XEMU_VERSION_MAJOR=0
+test -n "$XEMU_VERSION_MINOR" || XEMU_VERSION_MINOR=0
+test -n "$XEMU_VERSION_PATCH" || XEMU_VERSION_PATCH=0
+test -n "$XEMU_VERSION_COMMIT" || XEMU_VERSION_COMMIT=0
 
 cat <<EOF
 #define XEMU_VERSION       "$XEMU_VERSION"
